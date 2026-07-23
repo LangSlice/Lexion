@@ -1,0 +1,14 @@
+trash/
+
+# Workspace root artifacts (pnpm install / turbo run desde la raíz)
+node_modules/
+.turbo/
+
+# Env override a nivel raíz (docker-compose)
+.env
+.env.local
+
+# Ruido de OS/editor
+.DS_Store
+.vscode/
+.idea/

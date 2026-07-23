@@ -1,0 +1,30 @@
+# No Postgres service here on purpose: the backend talks to Supabase cloud
+# (SUPABASE_URL/SUPABASE_KEY in backend/.env) or falls back to its own
+# in-memory repository — see backend/app/song_processing/repository.py.
+services:
+  backend:
+    build: ./backend
+    ports:
+      # Host 8000 matches the frontend's default NUXT_PUBLIC_API_BASE
+      # (http://localhost:8000/api); container 8080 matches the backend
+      # Dockerfile's own EXPOSE/uvicorn --port.
+      - "8000:8080"
+    env_file:
+      - backend/.env
+
+  frontend:
+    build:
+      # Context is the repo root, not ./frontend — the Dockerfile needs the
+      # root pnpm workspace manifests to install as a workspace member.
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      # ssr: false means the browser calls the backend directly, not this
+      # container — so this must stay a host-reachable URL (localhost:8000),
+      # never the Docker-internal service name/port (http://backend:8080).
+      NUXT_PUBLIC_API_BASE: http://localhost:8000/api
+      NUXT_YOUTUBE_API_KEY: ${NUXT_YOUTUBE_API_KEY}
